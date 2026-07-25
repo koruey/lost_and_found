@@ -1,0 +1,112 @@
+/* 个人中心样式 */
+.user-card {
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.avatar-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+.avatar-btn::after { border: none; }
+
+.user-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+}
+
+.user-name {
+  max-width: 400rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edit-icon {
+  font-size: 28rpx;
+}
+
+/* 未登录 */
+.login-avatar-placeholder {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background-color: var(--bg-page);
+}
+
+.placeholder-icon {
+  font-size: 56rpx;
+  opacity: 0.5;
+}
+
+/* 编辑昵称弹窗 */
+.edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.edit-dialog {
+  position: relative;
+  width: 600rpx;
+  z-index: 1;
+}
+
+.edit-input {
+  width: 100%;
+  height: 80rpx;
+  border: 1rpx solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-md);
+  box-sizing: border-box;
+}
+
+.edit-actions {
+  gap: var(--spacing-md);
+}
+
+/* 功能菜单 */
+.menu-group {
+  border-radius: var(--border-radius);
+  margin: 0 var(--spacing-md);
+}
+
+.menu-item {
+  cursor: pointer;
+}
+
+.menu-icon {
+  font-size: 36rpx;
+}
+
+.menu-arrow {
+  font-size: 36rpx;
+  font-weight: 300;
+}
+
+.menu-divider {
+  height: 1rpx;
+  background-color: var(--border-color);
+  margin-left: 80rpx;
+  margin-right: var(--spacing-md);
+}

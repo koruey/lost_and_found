@@ -1,0 +1,75 @@
+/* 图片上传组件样式 */
+.image-uploader {
+  padding: var(--spacing-sm) 0;
+}
+
+/* 图片网格 3列 */
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.image-item {
+  position: relative;
+  width: calc((100% - 2 * var(--spacing-sm)) / 3);
+  aspect-ratio: 1;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+
+.image-item .image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 删除按钮 */
+.delete-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44rpx;
+  height: 44rpx;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-bottom-left-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-icon {
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+/* 添加按钮 */
+.add-btn {
+  border: 2rpx dashed var(--text-disabled);
+  background-color: #fafafa;
+}
+
+.add-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-symbol {
+  font-size: 64rpx;
+  color: var(--text-disabled);
+  line-height: 1;
+}
+
+.add-text {
+  margin-top: 4rpx;
+}
+
+.tips {
+  margin-top: var(--spacing-sm);
+  line-height: 1.5;
+}

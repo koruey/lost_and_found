@@ -1,0 +1,17 @@
+/* 收藏页样式 */
+.favorite-list {
+  height: 100vh;
+}
+
+.favorite-item-wrapper {
+  position: relative;
+  margin-bottom: 4rpx;
+}
+
+.card-inner {
+  pointer-events: auto;
+}
+
+.remove-btn {
+  padding: 8rpx 0 16rpx 0;
+}

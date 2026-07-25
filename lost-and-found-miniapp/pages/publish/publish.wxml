@@ -1,0 +1,219 @@
+<scroll-view class="publish-page" scroll-y>
+  <!-- 类型切换 -->
+  <view class="type-switch flex bg-white p-16">
+    <view
+      class="type-btn flex-1 {{itemType === 0 ? 'active lost' : ''}}"
+      data-type="0"
+      bindtap="onTypeChange"
+    >
+      失物
+    </view>
+    <view
+      class="type-btn flex-1 {{itemType === 1 ? 'active found' : ''}}"
+      data-type="1"
+      bindtap="onTypeChange"
+    >
+      招领
+    </view>
+  </view>
+
+  <!-- 图片上传 -->
+  <view class="section bg-white mt-16 p-24">
+    <view class="section-title text-bold mb-16">
+      上传图片 <text class="text-danger">*</text>
+      <text class="text-hint text-sm">（至少1张，最多9张）</text>
+    </view>
+    <image-uploader
+      max="{{9}}"
+      value="{{imageUrls}}"
+      bind:change="onImageChange"
+    />
+  </view>
+
+  <!-- AI辅助面板 -->
+  <view class="section bg-white mt-16 p-24">
+    <view class="ai-toggle flex-between" bindtap="toggleAiPanel">
+      <view class="flex items-center">
+        <text class="ai-icon">🤖</text>
+        <text class="text-bold ml-8">AI智能识别辅助</text>
+      </view>
+      <text class="text-hint">{{aiPanelExpanded ? '收起 ▲' : '展开 ▼'}}</text>
+    </view>
+
+    <!-- AI面板内容 -->
+    <view wx:if="{{aiPanelExpanded}}" class="ai-panel mt-24">
+      <!-- AI操作按钮 -->
+      <view class="ai-actions">
+        <button
+          class="btn btn-outline btn-sm ai-btn"
+          bindtap="onAiRecognize"
+          disabled="{{aiLoading || imageUrls.length === 0}}"
+        >
+          {{aiLoading ? '识别中...' : '🔍 AI智能识别'}}
+        </button>
+        <button
+          class="btn btn-outline btn-sm ai-btn"
+          bindtap="onAiEnhance"
+          disabled="{{aiLoading || imageUrls.length === 0}}"
+        >
+          {{aiLoading ? '处理中...' : '✨ AI增强描述'}}
+        </button>
+      </view>
+
+      <!-- 加载动画 -->
+      <view wx:if="{{aiLoading}}" class="ai-loading text-center mt-24">
+        <text>🤔 AI正在分析图片...</text>
+      </view>
+
+      <!-- AI识别结果 -->
+      <view wx:if="{{aiResults.category}}" class="ai-result mt-24">
+        <view class="flex-between">
+          <text class="text-bold text-sm">分类识别：</text>
+          <button class="btn btn-outline btn-sm" bindtap="onApplyAiCategory">
+            应用此分类
+          </button>
+        </view>
+        <text class="text-secondary text-sm mt-8">{{aiResults.category}}</text>
+      </view>
+
+      <view wx:if="{{aiResults.description}}" class="ai-result mt-24">
+        <view class="flex-between">
+          <text class="text-bold text-sm">图片描述：</text>
+          <button class="btn btn-outline btn-sm" bindtap="onApplyAiDescription">
+            应用此描述
+          </button>
+        </view>
+        <text class="text-secondary text-sm mt-8">{{aiResults.description}}</text>
+      </view>
+
+      <view wx:if="{{aiResults.ocrText}}" class="ai-result mt-24">
+        <text class="text-bold text-sm">OCR文字识别：</text>
+        <text class="text-secondary text-sm mt-8">{{aiResults.ocrText}}</text>
+      </view>
+
+      <view wx:if="{{aiResults.enhanced}}" class="ai-result mt-24">
+        <view class="text-center">
+          <text class="text-bold text-sm">增强描述：</text>
+        </view>
+        <text class="text-secondary text-sm mt-8" style="display:block">{{aiResults.enhanced}}</text>
+        <view class="text-center mt-16">
+          <button class="btn btn-outline btn-sm" bindtap="onApplyEnhanced">
+            应用此描述
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 物品信息表单 -->
+  <view class="section bg-white mt-16 p-24">
+    <view class="section-title text-bold mb-16">物品信息</view>
+
+    <!-- 标题 -->
+    <view class="form-item">
+      <view class="form-label">
+        标题 <text class="text-danger">*</text>
+      </view>
+      <input
+        class="form-input"
+        placeholder="请输入物品标题（2-100字）"
+        value="{{title}}"
+        bindinput="onTitleInput"
+        maxlength="100"
+      />
+    </view>
+
+    <!-- 分类 -->
+    <view class="form-item">
+      <view class="form-label">
+        分类 <text class="text-danger">*</text>
+      </view>
+      <picker
+        mode="selector"
+        range="{{categories}}"
+        range-key="name"
+        value="{{categoryIndex}}"
+        bindchange="onCategoryChange"
+      >
+        <view class="picker-value {{categoryName ? '' : 'text-hint'}}">
+          {{categoryName || '请选择分类'}}
+        </view>
+      </picker>
+    </view>
+
+    <!-- 描述 -->
+    <view class="form-item">
+      <view class="form-label">
+        详细描述 <text class="text-danger">*</text>
+      </view>
+      <textarea
+        class="form-textarea"
+        placeholder="请详细描述物品特征（10-500字）"
+        value="{{description}}"
+        bindinput="onDescriptionInput"
+        maxlength="500"
+        auto-height
+      />
+      <view class="char-count text-hint text-sm text-right">
+        {{description.length}}/500
+      </view>
+    </view>
+
+    <!-- 地点 -->
+    <view class="form-item">
+      <view class="form-label">
+        丢失/拾取地点 <text class="text-danger">*</text>
+      </view>
+      <input
+        class="form-input"
+        placeholder="例如：图书馆二楼"
+        value="{{location}}"
+        bindinput="onLocationInput"
+        maxlength="200"
+      />
+    </view>
+
+    <!-- 日期 -->
+    <view class="form-item">
+      <view class="form-label">
+        日期 <text class="text-danger">*</text>
+      </view>
+      <picker
+        mode="date"
+        value="{{itemDate}}"
+        end="{{today}}"
+        bindchange="onDateChange"
+      >
+        <view class="picker-value {{itemDate ? '' : 'text-hint'}}">
+          {{itemDate || '请选择日期'}}
+        </view>
+      </picker>
+    </view>
+
+    <!-- 联系方式 -->
+    <view class="form-item">
+      <view class="form-label">联系方式</view>
+      <input
+        class="form-input"
+        placeholder="手机号/微信/QQ（选填）"
+        value="{{contact}}"
+        bindinput="onContactInput"
+        maxlength="100"
+      />
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-bar p-24">
+    <button
+      class="btn btn-primary btn-block"
+      bindtap="onSubmit"
+      disabled="{{submitting}}"
+    >
+      {{submitting ? '提交中...' : (isEdit ? '保存修改' : '发布')}}
+    </button>
+  </view>
+
+  <!-- 底部安全距离 -->
+  <view style="height: 60rpx;"></view>
+</scroll-view>

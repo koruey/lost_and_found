@@ -1,0 +1,41 @@
+<view class="item-card card" bindtap="onTap">
+  <!-- 图片 + 内容 横向布局 -->
+  <view class="card-layout">
+    <!-- 左侧图片 -->
+    <view class="card-image">
+      <image
+        src="{{firstImage}}"
+        mode="aspectFill"
+        lazy-load
+        class="image"
+      />
+      <!-- 类型标签 -->
+      <view wx:if="{{showType}}" class="type-tag tag {{typeClass}}">
+        {{typeText}}
+      </view>
+    </view>
+
+    <!-- 右侧内容 -->
+    <view class="card-body flex-1">
+      <!-- 标题 -->
+      <view class="title text-ellipsis-2">{{title}}</view>
+
+      <!-- 分类 + 地点 -->
+      <view class="info-row">
+        <text wx:if="{{categoryName}}" class="tag tag-blue">{{categoryName}}</text>
+        <text wx:if="{{location}}" class="location text-secondary text-sm">
+          📍 {{location}}
+        </text>
+      </view>
+
+      <!-- 底部：时间 + 统计 -->
+      <view class="footer text-hint text-sm flex-between">
+        <text>{{timeAgo}}</text>
+        <view class="stats">
+          <text wx:if="{{viewCount > 0}}">👁 {{viewCount}}</text>
+          <text wx:if="{{commentCount > 0}}" class="ml-16">💬 {{commentCount}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

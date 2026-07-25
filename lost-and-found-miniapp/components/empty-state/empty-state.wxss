@@ -1,0 +1,17 @@
+/* 空状态样式 */
+.empty-state {
+  padding: 120rpx 0;
+  width: 100%;
+}
+
+.empty-text {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: var(--font-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.empty-action {
+  margin-top: var(--spacing-sm);
+}

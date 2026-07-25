@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "发布信息",
+  "usingComponents": {
+    "image-uploader": "/components/image-uploader/image-uploader"
+  }
+}

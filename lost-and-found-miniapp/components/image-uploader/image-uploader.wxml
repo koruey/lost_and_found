@@ -1,0 +1,41 @@
+<view class="image-uploader">
+  <!-- 已上传图片网格 -->
+  <view class="image-grid">
+    <view
+      wx:for="{{images}}"
+      wx:key="*this"
+      class="image-item"
+      data-index="{{index}}"
+    >
+      <image
+        src="{{item}}"
+        mode="aspectFill"
+        class="image"
+        bindtap="onPreviewImage"
+      />
+      <!-- 删除按钮 -->
+      <view class="delete-btn" catchtap="onDeleteImage" data-index="{{index}}">
+        <text class="delete-icon">✕</text>
+      </view>
+    </view>
+
+    <!-- 添加按钮 -->
+    <view
+      wx:if="{{images.length < max}}"
+      class="image-item add-btn"
+      bindtap="onChooseImage"
+    >
+      <view class="add-icon">
+        <text class="add-symbol">+</text>
+        <text class="add-text text-hint text-sm">
+          {{uploading ? '上传中...' : '添加图片'}}
+        </text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提示文字 -->
+  <view class="tips text-hint text-sm">
+    最多上传{{max}}张，支持 jpg/png/gif/webp
+  </view>
+</view>

@@ -1,0 +1,99 @@
+<view class="my-page">
+  <!-- 用户信息卡片 -->
+  <view class="user-card bg-white">
+    <!-- 已登录 -->
+    <block wx:if="{{isLoggedIn}}">
+      <view class="user-info flex items-center px-24 py-32">
+        <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image
+            class="user-avatar"
+            src="{{userInfo.avatarUrl || '/assets/default-avatar.png'}}"
+            mode="aspectFill"
+          />
+        </button>
+        <view class="ml-24 flex-1">
+          <view class="flex items-center" bindtap="onEditNickname">
+            <text class="user-name text-xl text-bold">{{userInfo.nickname || '未设置昵称'}}</text>
+            <text class="edit-icon text-hint ml-8">✏️</text>
+          </view>
+          <text class="user-id text-hint text-sm mt-4">
+            {{userInfo.role === 1 ? '管理员' : '普通用户'}}
+          </text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 未登录 -->
+    <view wx:else class="login-card flex-center flex-col py-48" bindtap="onLogin">
+      <view class="login-avatar-placeholder flex-center">
+        <text class="placeholder-icon">👤</text>
+      </view>
+      <text class="text-lg mt-16">点击登录</text>
+      <text class="text-hint text-sm mt-8">登录后享受完整功能</text>
+    </view>
+  </view>
+
+  <!-- 编辑昵称弹窗 -->
+  <view wx:if="{{showNicknameEdit}}" class="edit-modal">
+    <view class="edit-mask" catchtap="onCancelEditNickname"></view>
+    <view class="edit-dialog bg-white radius p-32">
+      <view class="text-bold text-lg mb-16">修改昵称</view>
+      <input
+        class="edit-input"
+        value="{{editingNickname}}"
+        bindinput="onNicknameInput"
+        placeholder="请输入昵称"
+        maxlength="20"
+      />
+      <view class="edit-actions flex mt-24">
+        <button class="btn btn-outline flex-1" bindtap="onCancelEditNickname">取消</button>
+        <button class="btn btn-primary flex-1" bindtap="onSaveNickname">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section mt-16">
+    <view class="menu-group bg-white">
+      <view class="menu-item flex-between px-24 py-24" bindtap="goToMyItems">
+        <view class="flex items-center">
+          <text class="menu-icon">📦</text>
+          <text class="ml-16">我的发布</text>
+        </view>
+        <text class="menu-arrow text-hint">›</text>
+      </view>
+
+      <view class="menu-divider"></view>
+
+      <view class="menu-item flex-between px-24 py-24" bindtap="goToFavorites">
+        <view class="flex items-center">
+          <text class="menu-icon">❤️</text>
+          <text class="ml-16">我的收藏</text>
+        </view>
+        <text class="menu-arrow text-hint">›</text>
+      </view>
+
+      <view class="menu-divider"></view>
+
+      <view class="menu-item flex-between px-24 py-24" bindtap="onEditNickname">
+        <view class="flex items-center">
+          <text class="menu-icon">✏️</text>
+          <text class="ml-16">修改昵称</text>
+        </view>
+        <text class="menu-arrow text-hint">›</text>
+      </view>
+    </view>
+
+    <!-- 退出登录 -->
+    <view wx:if="{{isLoggedIn}}" class="menu-group bg-white mt-16">
+      <view class="menu-item flex-center px-24 py-24 text-danger" bindtap="onLogout">
+        退出登录
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部版权 -->
+  <view class="footer text-center text-hint text-sm py-48">
+    校园失物招领 v1.0
+  </view>
+</view>

@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "校园失物招领",
+  "usingComponents": {
+    "item-card": "/components/item-card/item-card",
+    "empty-state": "/components/empty-state/empty-state"
+  },
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

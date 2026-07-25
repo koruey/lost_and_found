@@ -1,0 +1,41 @@
+/* 我的发布样式 */
+.tab-bar {
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.tab-item {
+  text-align: center;
+  padding: var(--spacing-md) 0;
+  font-size: var(--font-md);
+  color: var(--text-secondary);
+  position: relative;
+}
+
+.tab-item.active {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48rpx;
+  height: 4rpx;
+  background-color: var(--primary-color);
+  border-radius: 2rpx;
+}
+
+.item-list {
+  height: calc(100vh - 90rpx);
+}
+
+.my-item {
+  margin-bottom: 4rpx;
+}
+
+.item-card-content {
+  cursor: pointer;
+}

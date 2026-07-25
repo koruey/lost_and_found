@@ -1,0 +1,45 @@
+<view class="favorite-page">
+  <scroll-view
+    class="favorite-list"
+    scroll-y
+    refresher-enabled
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="onLoadMore"
+    lower-threshold="100"
+  >
+    <view
+      wx:for="{{itemList}}"
+      wx:key="id"
+      class="favorite-item-wrapper"
+    >
+      <!-- 收藏物品卡片 -->
+      <view class="card-inner" bindtap="goToDetail" data-id="{{item.id}}">
+        <item-card item="{{item}}" showType="{{true}}" />
+      </view>
+
+      <!-- 取消收藏按钮 -->
+      <view class="remove-btn text-center">
+        <text
+          class="text-danger text-sm"
+          data-id="{{item.id}}"
+          catchtap="onRemoveFavorite"
+        >
+          取消收藏
+        </text>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{loading}}" class="text-center p-16 text-hint">加载中...</view>
+    <view wx:if="{{!hasMore && itemList.length > 0}}" class="text-center p-16 text-hint">
+      — 没有更多了 —
+    </view>
+
+    <!-- 空状态 -->
+    <empty-state
+      wx:if="{{!loading && itemList.length === 0}}"
+      text="还没有收藏任何物品"
+    />
+  </scroll-view>
+</view>

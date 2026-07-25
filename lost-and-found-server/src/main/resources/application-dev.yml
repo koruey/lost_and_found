@@ -1,0 +1,56 @@
+# 开发环境配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/lost_and_found?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: your-db-password
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 2
+
+# 腾讯云COS对象存储
+cos:
+  secret-id: your-cos-secret-id
+  secret-key: your-cos-secret-key
+  region: ap-beijing
+  bucket-name: lost-and-found-1421437008
+
+# AI 配置
+ai:
+  provider: deepseek  # 可选: openai, claude, deepseek, qwen
+  openai:
+    api-key: your-openai-api-key
+    base-url: https://api.openai.com/v1
+    model: gpt-4o
+  claude:
+    api-key: your-claude-api-key
+    base-url: https://api.anthropic.com
+    model: claude-sonnet-5-20251001
+  deepseek:
+    api-key: your-deepseek-api-key
+    base-url: https://api.deepseek.com
+    model: deepseek-chat
+  qwen:
+    api-key: your-qwen-api-key
+    base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    model: qwen-vl-max
+
+# 日志
+logging:
+  level:
+    com.campus.lostfound: debug
+    org.springframework.web: info

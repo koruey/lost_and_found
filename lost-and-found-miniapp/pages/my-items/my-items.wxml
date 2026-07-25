@@ -1,0 +1,76 @@
+<view class="my-items-page">
+  <!-- Tab切换 -->
+  <view class="tab-bar flex bg-white">
+    <view
+      wx:for="{{tabList}}"
+      wx:key="value"
+      class="tab-item flex-1 {{activeType === item.value ? 'active' : ''}}"
+      data-type="{{item.value}}"
+      bindtap="onTabChange"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 列表 -->
+  <scroll-view
+    class="item-list"
+    scroll-y
+    refresher-enabled
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="onLoadMore"
+    lower-threshold="100"
+  >
+    <view
+      wx:for="{{itemList}}"
+      wx:key="id"
+      class="my-item card"
+    >
+      <!-- 物品卡片（可点击） -->
+      <view class="item-card-content" data-id="{{item.id}}" bindtap="goToDetail">
+        <item-card item="{{item}}" showType="{{true}}" />
+      </view>
+
+      <!-- 状态标签 + 操作按钮 -->
+      <view class="item-actions flex-between mt-16 pt-16" style="border-top: 1rpx solid var(--border-color);">
+        <view class="flex">
+          <!-- 状态标签 -->
+          <text wx:if="{{item.status === 0}}" class="tag tag-orange">待审核</text>
+          <text wx:elif="{{item.status === 1}}" class="tag tag-green">已发布</text>
+          <text wx:elif="{{item.status === 2}}" class="tag tag-red">审核不通过</text>
+          <text wx:elif="{{item.status === 3}}" class="tag tag-gray">已解决</text>
+        </view>
+
+        <view class="action-btns flex" wx:if="{{item.status === 1}}">
+          <button
+            class="action-btn btn btn-outline btn-sm"
+            data-id="{{item.id}}"
+            catchtap="onMarkResolved"
+          >
+            标记解决
+          </button>
+          <button
+            class="action-btn btn btn-danger btn-sm ml-16"
+            data-id="{{item.id}}"
+            catchtap="onDelete"
+          >
+            删除
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{loading}}" class="text-center p-16 text-hint">加载中...</view>
+    <view wx:if="{{!hasMore && itemList.length > 0}}" class="text-center p-16 text-hint">
+      — 没有更多了 —
+    </view>
+
+    <!-- 空状态 -->
+    <empty-state
+      wx:if="{{!loading && itemList.length === 0}}"
+      text="还没有发布任何物品"
+    />
+  </scroll-view>
+</view>

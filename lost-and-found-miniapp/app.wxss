@@ -1,0 +1,153 @@
+/**
+ * 全局样式
+ * CSS变量 + 通用工具类
+ */
+
+/* ===== CSS变量 ===== */
+page {
+  --primary-color: #4A90D9;
+  --primary-dark: #3A7BC8;
+  --success-color: #07C160;
+  --warning-color: #FF9500;
+  --danger-color: #FA5151;
+  --text-primary: #1A1A1A;
+  --text-secondary: #666666;
+  --text-hint: #999999;
+  --text-disabled: #CCCCCC;
+  --bg-page: #F5F5F5;
+  --bg-white: #FFFFFF;
+  --border-color: #E8E8E8;
+  --border-radius: 12rpx;
+  --spacing-xs: 8rpx;
+  --spacing-sm: 16rpx;
+  --spacing-md: 24rpx;
+  --spacing-lg: 32rpx;
+  --spacing-xl: 48rpx;
+  --font-sm: 24rpx;
+  --font-md: 28rpx;
+  --font-lg: 32rpx;
+  --font-xl: 36rpx;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', sans-serif;
+  font-size: var(--font-md);
+  color: var(--text-primary);
+  background-color: var(--bg-page);
+  box-sizing: border-box;
+}
+
+/* ===== 通用工具类 ===== */
+
+/* Flex布局 */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+
+/* 间距 */
+.mt-8 { margin-top: var(--spacing-xs); }
+.mt-16 { margin-top: var(--spacing-sm); }
+.mt-24 { margin-top: var(--spacing-md); }
+.mt-32 { margin-top: var(--spacing-lg); }
+.mb-8 { margin-bottom: var(--spacing-xs); }
+.mb-16 { margin-bottom: var(--spacing-sm); }
+.mb-24 { margin-bottom: var(--spacing-md); }
+.ml-8 { margin-left: var(--spacing-xs); }
+.ml-16 { margin-left: var(--spacing-sm); }
+.mr-8 { margin-right: var(--spacing-xs); }
+.mr-16 { margin-right: var(--spacing-sm); }
+.p-16 { padding: var(--spacing-sm); }
+.p-24 { padding: var(--spacing-md); }
+.p-32 { padding: var(--spacing-lg); }
+.px-24 { padding-left: var(--spacing-md); padding-right: var(--spacing-md); }
+.py-16 { padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
+.py-24 { padding-top: var(--spacing-md); padding-bottom: var(--spacing-md); }
+
+/* 文字 */
+.text-sm { font-size: var(--font-sm); }
+.text-md { font-size: var(--font-md); }
+.text-lg { font-size: var(--font-lg); }
+.text-xl { font-size: var(--font-xl); }
+.text-primary { color: var(--primary-color); }
+.text-secondary { color: var(--text-secondary); }
+.text-hint { color: var(--text-hint); }
+.text-danger { color: var(--danger-color); }
+.text-center { text-align: center; }
+.text-bold { font-weight: 600; }
+.text-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.text-ellipsis-2 { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+/* 背景 */
+.bg-white { background-color: var(--bg-white); }
+.bg-page { background-color: var(--bg-page); }
+
+/* 圆角 */
+.radius { border-radius: var(--border-radius); }
+.radius-round { border-radius: 9999rpx; }
+
+/* 卡片样式 */
+.card {
+  background-color: var(--bg-white);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  margin: var(--spacing-sm) var(--spacing-md);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 分隔线 */
+.divider {
+  height: 1rpx;
+  background-color: var(--border-color);
+  margin: var(--spacing-sm) 0;
+}
+
+/* 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 32rpx;
+  border-radius: var(--border-radius);
+  font-size: var(--font-md);
+  font-weight: 500;
+  border: none;
+  outline: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+.btn-primary:active { background-color: var(--primary-dark); }
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2rpx solid var(--primary-color);
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: #fff;
+}
+
+.btn-sm { padding: 8rpx 20rpx; font-size: var(--font-sm); }
+.btn-block { width: 100%; }
+
+/* 标签 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2rpx 14rpx;
+  border-radius: 6rpx;
+  font-size: 22rpx;
+  line-height: 1;
+}
+.tag-blue { background-color: #E8F2FF; color: #4A90D9; }
+.tag-green { background-color: #E8F9EF; color: #07C160; }
+.tag-orange { background-color: #FFF3E8; color: #FF9500; }
+.tag-red { background-color: #FEF0F0; color: #FA5151; }
+.tag-gray { background-color: #F0F0F0; color: #999; }

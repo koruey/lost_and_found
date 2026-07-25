@@ -1,0 +1,131 @@
+<!-- 搜索栏 -->
+<view class="search-bar bg-white">
+  <view class="search-input" bindtap="goToSearch">
+    <text class="search-icon">🔍</text>
+    <text class="search-placeholder text-hint">搜索物品...</text>
+  </view>
+</view>
+
+<!-- 公告栏 -->
+<view wx:if="{{announcements.length > 0}}" class="announce-bar bg-white flex items-center px-24 py-12">
+  <text class="announce-icon">📢</text>
+  <swiper class="announce-swiper flex-1 ml-12" autoplay interval="4000" circular vertical>
+    <swiper-item wx:for="{{announcements}}" wx:key="id">
+      <text class="announce-text text-ellipsis" data-id="{{item.id}}" catchtap="onAnnounceTap">{{item.title}}</text>
+    </swiper-item>
+  </swiper>
+</view>
+
+<!-- 失物/招领 Tab -->
+<view class="tab-bar bg-white">
+  <view
+    wx:for="{{tabTexts}}"
+    wx:key="*this"
+    class="tab-item {{activeTab === index ? 'active' : ''}}"
+    data-tab="{{index}}"
+    bindtap="onTabChange"
+  >
+    <text>{{item}}</text>
+    <view wx:if="{{activeTab === index}}" class="tab-line"></view>
+  </view>
+</view>
+
+<!-- 分类横向滚动 -->
+<scroll-view class="category-bar bg-white" scroll-x enable-flex>
+  <view class="category-list">
+    <view
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="category-item {{activeCategoryId === item.id ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onCategoryChange"
+    >
+      {{item.name}}
+    </view>
+  </view>
+</scroll-view>
+
+<!-- 物品列表 -->
+<scroll-view
+  class="item-list"
+  scroll-y
+  refresher-enabled
+  refresher-triggered="{{refreshing}}"
+  bindrefresherrefresh="onRefresh"
+  bindscrolltolower="onLoadMore"
+  lower-threshold="100"
+>
+  <!-- 列表项 -->
+  <item-card
+    wx:for="{{itemList}}"
+    wx:key="id"
+    item="{{item}}"
+    showType="{{true}}"
+  />
+
+  <!-- 加载更多提示 -->
+  <view wx:if="{{loading && itemList.length > 0}}" class="load-more text-hint text-center p-16">
+    加载中...
+  </view>
+  <view wx:if="{{!hasMore && itemList.length > 0}}" class="load-more text-hint text-center p-16">
+    — 没有更多了 —
+  </view>
+
+  <!-- 空状态 -->
+  <empty-state
+    wx:if="{{!loading && itemList.length === 0}}"
+    icon="📦"
+    text="还没有{{activeTab === 0 ? '失物' : '招领'}}信息"
+    actionText="去发布"
+    bind:action="goToPublish"
+  />
+</scroll-view>
+
+<!-- ===== 公告详情弹窗 ===== -->
+<view wx:if="{{showAnnounceDetail}}" class="announce-modal">
+  <view class="announce-mask" catchtap="closeAnnounceDetail"></view>
+  <view class="announce-dialog bg-white radius">
+    <view class="announce-dialog-header flex-between">
+      <text class="text-lg text-bold">📢 公告详情</text>
+      <text class="announce-close" catchtap="closeAnnounceDetail">✕</text>
+    </view>
+    <view class="announce-dialog-body">
+      <view class="announce-detail-title text-bold">{{currentAnnouncement.title}}</view>
+      <view class="announce-detail-time text-hint text-sm">{{currentAnnouncement.createdAt}}</view>
+      <view class="announce-detail-content">{{currentAnnouncement.content}}</view>
+    </view>
+  </view>
+</view>
+
+<!-- ===== 登录弹窗 ===== -->
+<view wx:if="{{showLoginModal}}" class="login-modal">
+  <view class="login-mask" catchtap="closeLoginModal"></view>
+  <view class="login-dialog bg-white radius">
+    <view class="login-header text-center">
+      <text class="login-icon">🔐</text>
+      <view class="login-title text-lg text-bold mt-16">欢迎使用校园失物招领</view>
+      <view class="login-desc text-secondary text-sm mt-8">登录后可发布信息、收藏物品、接收通知</view>
+    </view>
+
+    <view class="login-actions mt-32">
+      <!-- 微信一键登录 -->
+      <button class="btn btn-primary btn-block wx-login-btn" bindtap="onWxLogin">
+        <text>微信一键登录</text>
+      </button>
+
+      <!-- 手机号快捷登录（仅授权） -->
+      <button
+        class="btn btn-outline btn-block mt-16"
+        open-type="getPhoneNumber"
+        bindgetphonenumber="onGetPhoneNumber"
+      >
+        手机号快捷登录
+      </button>
+
+      <!-- 暂不登录 -->
+      <view class="skip-login text-center mt-16" bindtap="onSkipLogin">
+        <text class="text-hint text-sm">暂不登录，先看看</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园失物招领 - 管理后台</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <style>
+        :root {
+            --primary: #4A90D9;
+            --bg: #f0f2f5;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); }
+
+        /* 登录页 */
+        .login-container {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-card {
+            width: 400px; padding: 40px; background: #fff; border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.15);
+        }
+        .login-card h1 { text-align: center; font-size: 24px; color: #333; margin-bottom: 8px; }
+        .login-card p  { text-align: center; color: #999; margin-bottom: 30px; font-size: 14px; }
+
+        /* 管理布局 */
+        .admin-container { min-height: 100vh; }
+        .el-header {
+            background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.08);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; height: 60px; position: sticky; top: 0; z-index: 100;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-left h2 { font-size: 18px; color: #333; }
+        .header-left .logo { font-size: 24px; }
+
+        .el-main { padding: 20px 24px; }
+        .el-tabs__nav-wrap::after { display: none; }
+
+        /* 统计卡片 */
+        .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            display: flex; align-items: center; gap: 16px; transition: transform .2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-card .icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .stat-card .info .num { font-size: 28px; font-weight: 700; color: #333; }
+        .stat-card .info .label { font-size: 13px; color: #999; margin-top: 2px; }
+        .icon-blue   { background: #e8f4fd; color: #4A90D9; }
+        .icon-green  { background: #e8f8e8; color: #52c41a; }
+        .icon-orange { background: #fff7e6; color: #fa8c16; }
+        .icon-purple { background: #f0e6ff; color: #722ed1; }
+        .icon-cyan   { background: #e6fffb; color: #13c2c2; }
+
+        /* 图表区 */
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .chart-box { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+        .chart-box h3 { font-size: 15px; color: #333; margin-bottom: 12px; }
+        .chart-inner { width: 100%; height: 320px; }
+
+        /* 面板 */
+        .panel-box { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .panel-header h3 { font-size: 16px; color: #333; }
+
+        /* 修复 Element Plus 表格 */
+        .el-table { font-size: 14px; }
+        .el-table th { background: #fafafa; color: #666; font-weight: 600; }
+
+        @media (max-width: 768px) {
+            .charts-row { grid-template-columns: 1fr; }
+            .stat-cards { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <!-- ==================== 登录界面 ==================== -->
+    <div v-if="!isLoggedIn" class="login-container">
+        <div class="login-card">
+            <h1>🏫 校园失物招领</h1>
+            <p>管理后台登录</p>
+            <el-form @submit.prevent="doLogin">
+                <el-form-item>
+                    <el-input
+                        v-model="adminPassword"
+                        type="password"
+                        placeholder="请输入管理员密码"
+                        show-password
+                        size="large"
+                        @keyup.enter="doLogin"
+                    />
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" size="large" style="width:100%" @click="doLogin" :loading="loginLoading">
+                        登 录
+                    </el-button>
+                </el-form-item>
+            </el-form>
+            <p v-if="loginError" style="color:#f56c6c;text-align:center;font-size:13px">{{ loginError }}</p>
+        </div>
+    </div>
+
+    <!-- ==================== 管理界面 ==================== -->
+    <div v-else class="admin-container">
+        <el-container>
+            <el-header>
+                <div class="header-left">
+                    <span class="logo">🏫</span>
+                    <h2>校园失物招领管理系统</h2>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                    <span style="color:#999;font-size:13px">{{ adminNickname }}</span>
+                    <el-button type="danger" text @click="doLogout">退出登录</el-button>
+                </div>
+            </el-header>
+
+            <el-main>
+                <el-tabs v-model="activeTab" @tab-change="onTabChange" type="border-card">
+                    <!-- ===== 仪表盘 ===== -->
+                    <el-tab-pane label="📊 仪表盘" name="dashboard">
+                        <div class="stat-cards">
+                            <div class="stat-card">
+                                <div class="icon icon-blue">📱</div>
+                                <div class="info"><div class="num">{{ stats.lostCount }}</div><div class="label">失物总数</div></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="icon icon-green">✅</div>
+                                <div class="info"><div class="num">{{ stats.foundCount }}</div><div class="label">招领总数</div></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="icon icon-orange">🎯</div>
+                                <div class="info"><div class="num">{{ stats.resolvedCount }}</div><div class="label">已解决</div></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="icon icon-purple">🔗</div>
+                                <div class="info"><div class="num">{{ stats.matchCount }}</div><div class="label">匹配成功</div></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="icon icon-cyan">👥</div>
+                                <div class="info"><div class="num">{{ stats.userCount }}</div><div class="label">用户总数</div></div>
+                            </div>
+                        </div>
+                        <div class="charts-row">
+                            <div class="chart-box">
+                                <h3>物品分类分布</h3>
+                                <div class="chart-inner" id="chart-category"></div>
+                            </div>
+                            <div class="chart-box">
+                                <h3>近7日发布趋势</h3>
+                                <div class="chart-inner" id="chart-trend"></div>
+                            </div>
+                        </div>
+                    </el-tab-pane>
+
+                    <!-- ===== 用户管理 ===== -->
+                    <el-tab-pane label="👥 用户管理" name="users">
+                        <div class="panel-box">
+                            <div class="panel-header"><h3>用户列表</h3></div>
+                            <el-table :data="users.list" stripe v-loading="users.loading" empty-text="暂无用户数据">
+                                <el-table-column label="ID" width="70">
+                                    <template #default="{row}">{{ row.id }}</template>
+                                </el-table-column>
+                                <el-table-column label="昵称" width="140">
+                                    <template #default="{row}">{{ row.nickname }}</template>
+                                </el-table-column>
+                                <el-table-column label="OpenID" width="160">
+                                    <template #default="{row}"><span style="color:#999;font-size:12px">{{ row.openid }}</span></template>
+                                </el-table-column>
+                                <el-table-column label="手机号" width="130">
+                                    <template #default="{row}">{{ row.phone }}</template>
+                                </el-table-column>
+                                <el-table-column label="角色" width="90">
+                                    <template #default="{row}">
+                                        <el-tag :type="row.role===1?'danger':'info'" size="small">{{ row.role===1?'管理员':'用户' }}</el-tag>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="状态" width="90">
+                                    <template #default="{row}">
+                                        <el-tag :type="row.status===1?'success':'danger'" size="small">{{ row.status===1?'正常':'禁用' }}</el-tag>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="注册时间" min-width="160">
+                                    <template #default="{row}">{{ row.createdAt }}</template>
+                                </el-table-column>
+                                <el-table-column label="操作" width="120" fixed="right">
+                                    <template #default="{row}">
+                                        <el-button
+                                            :type="row.status===1?'warning':'success'"
+                                            size="small"
+                                            @click="toggleUserStatus(row)"
+                                        >{{ row.status===1?'禁用':'启用' }}</el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                            <div style="margin-top:16px;display:flex;justify-content:flex-end">
+                                <el-pagination
+                                    v-model:current-page="users.page" v-model:page-size="users.size"
+                                    :total="users.total" :page-sizes="[5,10,20]" layout="total,sizes,prev,pager,next"
+                                    @current-change="loadUsers" @size-change="loadUsers" background small
+                                />
+                            </div>
+                        </div>
+                    </el-tab-pane>
+
+                    <!-- ===== 物品审核 ===== -->
+                    <el-tab-pane label="📋 物品审核" name="audit">
+                        <div class="panel-box">
+                            <div class="panel-header"><h3>待审核物品</h3></div>
+                            <el-table :data="audit.list" stripe v-loading="audit.loading" empty-text="暂无待审核物品">
+                                <el-table-column label="ID" width="70">
+                                    <template #default="{row}">{{ row.id }}</template>
+                                </el-table-column>
+                                <el-table-column label="标题" width="180">
+                                    <template #default="{row}">{{ row.title }}</template>
+                                </el-table-column>
+                                <el-table-column label="类型" width="80">
+                                    <template #default="{row}">
+                                        <el-tag :type="row.type===0?'warning':'success'" size="small">{{ row.type===0?'失物':'招领' }}</el-tag>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="描述" min-width="200">
+                                    <template #default="{row}">
+                                        <span style="color:#666;font-size:13px">{{ (row.description||'').substring(0,50) }}{{ (row.description||'').length>50?'...':'' }}</span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="地点" width="120">
+                                    <template #default="{row}">{{ row.location }}</template>
+                                </el-table-column>
+                                <el-table-column label="发布时间" width="160">
+                                    <template #default="{row}">{{ row.createdAt }}</template>
+                                </el-table-column>
+                                <el-table-column label="操作" width="160" fixed="right">
+                                    <template #default="{row}">
+                                        <el-button-group>
+                                            <el-button type="success" size="small" @click="auditItem(row,1)">通过</el-button>
+                                            <el-button type="danger" size="small" @click="auditItem(row,2)">驳回</el-button>
+                                        </el-button-group>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                            <div style="margin-top:16px;display:flex;justify-content:flex-end">
+                                <el-pagination
+                                    v-model:current-page="audit.page" v-model:page-size="audit.size"
+                                    :total="audit.total" :page-sizes="[5,10,20]" layout="total,sizes,prev,pager,next"
+                                    @current-change="loadAudit" @size-change="loadAudit" background small
+                                />
+                            </div>
+                        </div>
+                    </el-tab-pane>
+
+                    <!-- ===== 评论管理 ===== -->
+                    <el-tab-pane label="💬 评论管理" name="comments">
+                        <div class="panel-box">
+                            <div class="panel-header"><h3>评论列表</h3></div>
+                            <el-table :data="comments.list" stripe v-loading="comments.loading" empty-text="暂无评论">
+                                <el-table-column label="ID" width="70">
+                                    <template #default="{row}">{{ row.id }}</template>
+                                </el-table-column>
+                                <el-table-column label="物品ID" width="90">
+                                    <template #default="{row}">{{ row.itemId }}</template>
+                                </el-table-column>
+                                <el-table-column label="用户ID" width="90">
+                                    <template #default="{row}">{{ row.userId }}</template>
+                                </el-table-column>
+                                <el-table-column label="内容" min-width="250">
+                                    <template #default="{row}">{{ row.content }}</template>
+                                </el-table-column>
+                                <el-table-column label="状态" width="90">
+                                    <template #default="{row}">
+                                        <el-tag :type="row.status===0?'success':'danger'" size="small">{{ row.status===0?'正常':'已删除' }}</el-tag>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="时间" width="160">
+                                    <template #default="{row}">{{ row.createdAt }}</template>
+                                </el-table-column>
+                                <el-table-column label="操作" width="100" fixed="right">
+                                    <template #default="{row}">
+                                        <el-button v-if="row.status===0" type="danger" size="small" @click="deleteComment(row)">删除</el-button>
+                                        <span v-else style="color:#ccc">—</span>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                            <div style="margin-top:16px;display:flex;justify-content:flex-end">
+                                <el-pagination
+                                    v-model:current-page="comments.page" v-model:page-size="comments.size"
+                                    :total="comments.total" :page-sizes="[5,10,20]" layout="total,sizes,prev,pager,next"
+                                    @current-change="loadComments" @size-change="loadComments" background small
+                                />
+                            </div>
+                        </div>
+                    </el-tab-pane>
+
+                    <!-- ===== 公告管理 ===== -->
+                    <el-tab-pane label="📢 公告管理" name="announcements">
+                        <div class="panel-box">
+                            <div class="panel-header">
+                                <h3>公告列表</h3>
+                                <el-button type="primary" @click="showAnnounceDialog(null)">发布公告</el-button>
+                            </div>
+                            <el-table :data="announcements.list" stripe v-loading="announcements.loading" empty-text="暂无公告">
+                                <el-table-column label="ID" width="70">
+                                    <template #default="{row}">{{ row.id }}</template>
+                                </el-table-column>
+                                <el-table-column label="标题" width="220">
+                                    <template #default="{row}">{{ row.title }}</template>
+                                </el-table-column>
+                                <el-table-column label="内容" min-width="250">
+                                    <template #default="{row}">
+                                        <span style="color:#666;font-size:13px">{{ (row.content||'').substring(0,60) }}{{ (row.content||'').length>60?'...':'' }}</span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="状态" width="90">
+                                    <template #default="{row}">
+                                        <el-tag :type="row.status===1?'success':'info'" size="small">{{ row.status===1?'显示':'隐藏' }}</el-tag>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="创建时间" width="160">
+                                    <template #default="{row}">{{ row.createdAt }}</template>
+                                </el-table-column>
+                                <el-table-column label="操作" width="240" fixed="right">
+                                    <template #default="{row}">
+                                        <el-button type="primary" size="small" @click="showAnnounceDialog(row)">编辑</el-button>
+                                        <el-button :type="row.status===1?'warning':'success'" size="small" @click="toggleAnnounceStatus(row)">
+                                            {{ row.status===1?'隐藏':'显示' }}
+                                        </el-button>
+                                        <el-button type="danger" size="small" @click="deleteAnnouncement(row)">删除</el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </el-tab-pane>
+
+                    <!-- ===== 匹配记录 ===== -->
+                    <el-tab-pane label="🔗 匹配记录" name="matches">
+                        <div class="panel-box">
+                            <div class="panel-header"><h3>匹配记录列表</h3></div>
+                            <el-table :data="matches.list" stripe v-loading="matches.loading" empty-text="暂无匹配记录">
+                                <el-table-column label="ID" width="70">
+                                    <template #default="{row}">{{ row.id }}</template>
+                                </el-table-column>
+                                <el-table-column prop="lostItemTitle" label="失物" width="180">
+                                    <template #default="{row}"><span style="color:#e6a23c">{{ row.lostItemTitle||'—' }}</span></template>
+                                </el-table-column>
+                                <el-table-column prop="foundItemTitle" label="招领" width="180">
+                                    <template #default="{row}"><span style="color:#67c23a">{{ row.foundItemTitle||'—' }}</span></template>
+                                </el-table-column>
+                                <el-table-column label="综合分数" width="100">
+                                    <template #default="{row}">
+                                        <el-tag :type="row.totalScore>=80?'success':row.totalScore>=60?'warning':'info'" size="small">{{ row.totalScore }}</el-tag>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="文本" width="70">
+                                    <template #default="{row}">{{ row.textScore }}%</template>
+                                </el-table-column>
+                                <el-table-column label="图片" width="70">
+                                    <template #default="{row}">{{ row.imageScore }}%</template>
+                                </el-table-column>
+                                <el-table-column label="OCR" width="70">
+                                    <template #default="{row}">{{ row.ocrScore }}%</template>
+                                </el-table-column>
+                                <el-table-column label="分类" width="70">
+                                    <template #default="{row}">{{ row.categoryScore }}%</template>
+                                </el-table-column>
+                                <el-table-column label="地点" width="70">
+                                    <template #default="{row}">{{ row.locationScore }}%</template>
+                                </el-table-column>
+                                <el-table-column label="时间" width="70">
+                                    <template #default="{row}">{{ row.timeScore }}%</template>
+                                </el-table-column>
+                                <el-table-column label="创建时间" width="160">
+                                    <template #default="{row}">{{ row.createdAt }}</template>
+                                </el-table-column>
+                            </el-table>
+                            <div style="margin-top:16px;display:flex;justify-content:flex-end">
+                                <el-pagination
+                                    v-model:current-page="matches.page" v-model:page-size="matches.size"
+                                    :total="matches.total" :page-sizes="[5,10,20]" layout="total,sizes,prev,pager,next"
+                                    @current-change="loadMatches" @size-change="loadMatches" background small
+                                />
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+            </el-main>
+        </el-container>
+    </div>
+
+    <!-- ==================== 公告编辑弹窗 ==================== -->
+    <el-dialog
+        v-model="announceDialogVisible"
+        :title="announceForm.isEdit?'编辑公告':'发布公告'"
+        width="500px"
+        @closed="resetAnnounceForm"
+    >
+        <el-form label-position="top">
+            <el-form-item label="公告标题" required>
+                <el-input v-model="announceForm.title" placeholder="请输入标题" maxlength="200" />
+            </el-form-item>
+            <el-form-item label="公告内容" required>
+                <el-input v-model="announceForm.content" type="textarea" :rows="5" placeholder="请输入内容" maxlength="2000" />
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <el-button @click="announceDialogVisible=false">取消</el-button>
+            <el-button type="primary" @click="saveAnnouncement" :loading="announceForm.saving">
+                {{ announceForm.isEdit?'保存修改':'发布' }}
+            </el-button>
+        </template>
+    </el-dialog>
+
+</div>
+
+<!-- Vue 3 -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<!-- Element Plus -->
+<script src="https://unpkg.com/element-plus/dist/index.full.min.js"></script>
+<!-- Element Plus 中文语言 -->
+<script src="https://unpkg.com/element-plus/dist/locale/zh-cn.min.js"></script>
+<!-- ECharts -->
+<script src="https://unpkg.com/echarts@5/dist/echarts.min.js"></script>
+
+<script>
+const { createApp, ref, reactive, computed, nextTick, onMounted } = Vue;
+
+const API_BASE = 'http://localhost:8123';
+
+const app = createApp({
+    data() {
+        return {
+            // 登录
+            isLoggedIn: false,
+            adminPassword: '',
+            adminNickname: '',
+            loginLoading: false,
+            loginError: '',
+            token: '',
+
+            // 标签页
+            activeTab: 'dashboard',
+
+            // 仪表盘
+            stats: { lostCount: 0, foundCount: 0, resolvedCount: 0, matchCount: 0, userCount: 0, categoryStats: [], dailyTrend: [] },
+
+            // 用户
+            users: { list: [], page: 1, size: 10, total: 0, loading: false },
+
+            // 审核
+            audit: { list: [], page: 1, size: 10, total: 0, loading: false },
+
+            // 评论
+            comments: { list: [], page: 1, size: 10, total: 0, loading: false },
+
+            // 公告
+            announcements: { list: [], loading: false },
+            announceDialogVisible: false,
+            announceForm: { isEdit: false, id: null, title: '', content: '', saving: false },
+
+            // 匹配
+            matches: { list: [], page: 1, size: 10, total: 0, loading: false },
+        }
+    },
+
+    methods: {
+        // ========== API 请求封装 ==========
+        async api(url, options = {}) {
+            const headers = { 'Content-Type': 'application/json', ...options.headers };
+            if (this.token) headers['Authorization'] = 'Bearer ' + this.token;
+
+            const resp = await fetch(API_BASE + url, { ...options, headers });
+            const json = await resp.json();
+
+            if (json.code === 200) return json.data;
+            if (json.code === 401) { this.doLogout(); throw new Error('登录已过期'); }
+            throw new Error(json.message || '请求失败');
+        },
+
+        // ========== 登录/登出 ==========
+        checkLogin() {
+            const saved = localStorage.getItem('admin_token');
+            if (saved) {
+                this.token = saved;
+                this.isLoggedIn = true;
+                // 尝试获取统计信息验证token
+                this.api('/api/admin/statistics').then(data => {
+                    this.stats = data;
+                    this.adminNickname = '管理员';
+                    this.renderCharts();
+                }).catch(() => {
+                    this.doLogout();
+                });
+            }
+        },
+
+        async doLogin() {
+            if (!this.adminPassword) { this.loginError = '请输入密码'; return; }
+            this.loginLoading = true;
+            this.loginError = '';
+            try {
+                const data = await this.api('/api/admin/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ password: this.adminPassword })
+                });
+                this.token = data.token;
+                this.adminNickname = data.nickname || '管理员';
+                localStorage.setItem('admin_token', this.token);
+                this.isLoggedIn = true;
+                this.adminPassword = '';
+                this.loadDashboard();
+            } catch (e) {
+                this.loginError = e.message || '登录失败';
+            } finally {
+                this.loginLoading = false;
+            }
+        },
+
+        doLogout() {
+            localStorage.removeItem('admin_token');
+            this.token = '';
+            this.isLoggedIn = false;
+            this.adminNickname = '';
+            this.activeTab = 'dashboard';
+        },
+
+        // ========== 标签页切换 ==========
+        onTabChange(name) {
+            switch (name) {
+                case 'dashboard': this.loadDashboard(); break;
+                case 'users': this.loadUsers(); break;
+                case 'audit': this.loadAudit(); break;
+                case 'comments': this.loadComments(); break;
+                case 'announcements': this.loadAnnouncements(); break;
+                case 'matches': this.loadMatches(); break;
+            }
+        },
+
+        // ========== 仪表盘 ==========
+        async loadDashboard() {
+            try {
+                this.stats = await this.api('/api/admin/statistics');
+                await nextTick();
+                this.renderCharts();
+            } catch (e) {
+                ElementPlus.ElMessage.error('加载统计失败: ' + e.message);
+            }
+        },
+
+        renderCharts() {
+            // 饼图 - 分类分布
+            const catDom = document.getElementById('chart-category');
+            if (catDom) {
+                let catChart = echarts.getInstanceByDom(catDom);
+                if (!catChart) catChart = echarts.init(catDom);
+                const catData = (this.stats.categoryStats || []).map(c => ({ name: c.name, value: c.count }));
+                catChart.setOption({
+                    tooltip: { trigger: 'item' },
+                    legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { fontSize: 12 } },
+                    series: [{
+                        type: 'pie', radius: ['45%', '75%'], center: ['40%', '50%'],
+                        data: catData.length > 0 ? catData : [{ name: '暂无数据', value: 1 }],
+                        emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,.5)' } },
+                        label: { formatter: '{b}\n{d}%' }
+                    }]
+                }, true);
+            }
+
+            // 折线图 - 7日趋势
+            const trendDom = document.getElementById('chart-trend');
+            if (trendDom) {
+                let trendChart = echarts.getInstanceByDom(trendDom);
+                if (!trendChart) trendChart = echarts.init(trendDom);
+                const trendData = this.stats.dailyTrend || [];
+                trendChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    xAxis: { type: 'category', data: trendData.map(d => d.date.substring(5)), axisLabel: { fontSize: 11 } },
+                    yAxis: { type: 'value', minInterval: 1 },
+                    series: [{
+                        type: 'line', data: trendData.map(d => d.count),
+                        smooth: true, symbol: 'circle', symbolSize: 6,
+                        lineStyle: { color: '#4A90D9', width: 2 },
+                        itemStyle: { color: '#4A90D9' },
+                        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[
+                            {offset:0,color:'rgba(74,144,217,.3)'},{offset:1,color:'rgba(74,144,217,.02)'}
+                        ])}
+                    }],
+                    grid: { left: 40, right: 20, top: 20, bottom: 30 }
+                }, true);
+            }
+        },
+
+        // ========== 用户管理 ==========
+        async loadUsers() {
+            this.users.loading = true;
+            try {
+                const data = await this.api(`/api/admin/users?page=${this.users.page}&size=${this.users.size}`);
+                this.users.list = data.records || [];
+                this.users.total = data.total || 0;
+            } catch (e) {
+                ElementPlus.ElMessage.error('加载用户列表失败');
+            } finally {
+                this.users.loading = false;
+            }
+        },
+
+        async toggleUserStatus(row) {
+            const action = row.status === 1 ? '禁用' : '启用';
+            try {
+                await ElementPlus.ElMessageBox.confirm(`确定要${action}用户 "${row.nickname}" 吗？`, '操作确认', {
+                    confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
+                });
+                await this.api(`/api/admin/users/${row.id}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: row.status === 1 ? 0 : 1 })
+                });
+                ElementPlus.ElMessage.success(`${action}成功`);
+                this.loadUsers();
+            } catch (e) {
+                if (e !== 'cancel') ElementPlus.ElMessage.error(e.message || '操作失败');
+            }
+        },
+
+        // ========== 物品审核 ==========
+        async loadAudit() {
+            this.audit.loading = true;
+            try {
+                const data = await this.api(`/api/admin/items/pending?page=${this.audit.page}&size=${this.audit.size}`);
+                this.audit.list = data.records || [];
+                this.audit.total = data.total || 0;
+            } catch (e) {
+                ElementPlus.ElMessage.error('加载待审核列表失败');
+            } finally {
+                this.audit.loading = false;
+            }
+        },
+
+        async auditItem(row, status) {
+            const action = status === 1 ? '通过' : '驳回';
+            try {
+                await ElementPlus.ElMessageBox.confirm(`确定要${action}物品 "${row.title}" 吗？`, '审核确认', {
+                    confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
+                });
+                await this.api(`/api/admin/items/${row.id}/audit`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: status })
+                });
+                ElementPlus.ElMessage.success(`审核${action}`);
+                this.loadAudit();
+            } catch (e) {
+                if (e !== 'cancel') ElementPlus.ElMessage.error(e.message || '审核失败');
+            }
+        },
+
+        // ========== 评论管理 ==========
+        async loadComments() {
+            this.comments.loading = true;
+            try {
+                const data = await this.api(`/api/admin/comments?page=${this.comments.page}&size=${this.comments.size}`);
+                this.comments.list = data.records || [];
+                this.comments.total = data.total || 0;
+            } catch (e) {
+                ElementPlus.ElMessage.error('加载评论列表失败');
+            } finally {
+                this.comments.loading = false;
+            }
+        },
+
+        async deleteComment(row) {
+            try {
+                await ElementPlus.ElMessageBox.confirm('确定要删除该评论吗？', '操作确认', {
+                    confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
+                });
+                await this.api(`/api/admin/comments/${row.id}`, { method: 'DELETE' });
+                ElementPlus.ElMessage.success('删除成功');
+                this.loadComments();
+            } catch (e) {
+                if (e !== 'cancel') ElementPlus.ElMessage.error(e.message || '删除失败');
+            }
+        },
+
+        // ========== 公告管理 ==========
+        async loadAnnouncements() {
+            this.announcements.loading = true;
+            try {
+                this.announcements.list = await this.api('/api/admin/announcements');
+            } catch (e) {
+                ElementPlus.ElMessage.error('加载公告列表失败');
+            } finally {
+                this.announcements.loading = false;
+            }
+        },
+
+        showAnnounceDialog(row) {
+            if (row) {
+                this.announceForm = { isEdit: true, id: row.id, title: row.title, content: row.content, saving: false };
+            } else {
+                this.announceForm = { isEdit: false, id: null, title: '', content: '', saving: false };
+            }
+            this.announceDialogVisible = true;
+        },
+
+        async saveAnnouncement() {
+            if (!this.announceForm.title.trim()) { ElementPlus.ElMessage.warning('请输入标题'); return; }
+            if (!this.announceForm.content.trim()) { ElementPlus.ElMessage.warning('请输入内容'); return; }
+
+            this.announceForm.saving = true;
+            try {
+                const body = JSON.stringify({ title: this.announceForm.title, content: this.announceForm.content });
+                if (this.announceForm.isEdit) {
+                    await this.api(`/api/admin/announcements/${this.announceForm.id}`, { method: 'PUT', body });
+                    ElementPlus.ElMessage.success('修改成功');
+                } else {
+                    await this.api('/api/admin/announcements', { method: 'POST', body });
+                    ElementPlus.ElMessage.success('发布成功');
+                }
+                this.announceDialogVisible = false;
+                this.loadAnnouncements();
+            } catch (e) {
+                ElementPlus.ElMessage.error(e.message || '操作失败');
+            } finally {
+                this.announceForm.saving = false;
+            }
+        },
+
+        resetAnnounceForm() {
+            this.announceForm = { isEdit: false, id: null, title: '', content: '', saving: false };
+        },
+
+        async toggleAnnounceStatus(row) {
+            const newStatus = row.status === 1 ? 0 : 1;
+            const action = newStatus === 1 ? '显示' : '隐藏';
+            try {
+                await this.api(`/api/admin/announcements/${row.id}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: newStatus })
+                });
+                ElementPlus.ElMessage.success(`已切换为${action}`);
+                this.loadAnnouncements();
+            } catch (e) {
+                ElementPlus.ElMessage.error(e.message || '操作失败');
+            }
+        },
+
+        async deleteAnnouncement(row) {
+            try {
+                await ElementPlus.ElMessageBox.confirm(`确定要删除公告 "${row.title}" 吗？`, '操作确认', {
+                    confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
+                });
+                await this.api(`/api/admin/announcements/${row.id}`, { method: 'DELETE' });
+                ElementPlus.ElMessage.success('删除成功');
+                this.loadAnnouncements();
+            } catch (e) {
+                if (e !== 'cancel') ElementPlus.ElMessage.error(e.message || '删除失败');
+            }
+        },
+
+        // ========== 匹配记录 ==========
+        async loadMatches() {
+            this.matches.loading = true;
+            try {
+                const data = await this.api(`/api/admin/matches?page=${this.matches.page}&size=${this.matches.size}`);
+                this.matches.list = data.records || [];
+                this.matches.total = data.total || 0;
+            } catch (e) {
+                ElementPlus.ElMessage.error('加载匹配记录失败');
+            } finally {
+                this.matches.loading = false;
+            }
+        },
+    },
+
+    mounted() {
+        this.checkLogin();
+    }
+});
+
+app.use(ElementPlus, { locale: ElementPlusLocaleZhCn });
+app.mount('#app');
+</script>
+</body>
+</html>

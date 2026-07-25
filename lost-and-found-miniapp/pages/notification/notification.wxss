@@ -1,0 +1,54 @@
+/* 通知页样式 */
+.notification-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.notification-list {
+  flex: 1;
+}
+
+/* 通知项 */
+.notification-item {
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.notification-item.unread {
+  background-color: #F8FBFF;
+}
+
+.notify-icon {
+  width: 72rpx;
+  height: 72rpx;
+  background-color: var(--bg-page);
+  border-radius: 50%;
+  font-size: 32rpx;
+  flex-shrink: 0;
+}
+
+.notify-body {
+  overflow: hidden;
+}
+
+.notify-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 400rpx;
+}
+
+.unread-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background-color: var(--danger-color);
+}
+
+.notify-content {
+  line-height: 1.5;
+}

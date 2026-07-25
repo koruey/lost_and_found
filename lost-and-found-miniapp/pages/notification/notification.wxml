@@ -1,0 +1,61 @@
+<view class="notification-page">
+  <!-- 顶部操作栏 -->
+  <view wx:if="{{unreadCount > 0}}" class="top-bar flex-between bg-white px-24 py-16">
+    <text class="text-secondary text-sm">共 {{unreadCount}} 条未读</text>
+    <text class="text-primary text-sm" bindtap="onMarkAllRead">全部已读</text>
+  </view>
+
+  <!-- 通知列表 -->
+  <scroll-view
+    class="notification-list"
+    scroll-y
+    refresher-enabled
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="onLoadMore"
+    lower-threshold="100"
+  >
+    <view
+      wx:for="{{notifications}}"
+      wx:key="id"
+      class="notification-item flex bg-white px-24 py-16 {{!item.isRead ? 'unread' : ''}}"
+      data-notification="{{item}}"
+      bindtap="onNotificationTap"
+    >
+      <!-- 图标 -->
+      <view class="notify-icon flex-center">
+        <text>{{item.icon}}</text>
+      </view>
+
+      <!-- 内容 -->
+      <view class="notify-body flex-1 ml-16">
+        <view class="flex-between">
+          <text class="notify-title text-bold text-md {{!item.isRead ? '' : 'text-secondary'}}">
+            {{item.title}}
+          </text>
+          <view class="flex items-center">
+            <view wx:if="{{!item.isRead}}" class="unread-dot"></view>
+            <text class="text-hint text-sm ml-8">{{item.timeAgo}}</text>
+          </view>
+        </view>
+        <text class="notify-content text-sm text-secondary mt-8 text-ellipsis-2">
+          {{item.content}}
+        </text>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{loading}}" class="text-center p-16 text-hint">加载中...</view>
+    <view wx:if="{{!hasMore && notifications.length > 0}}" class="text-center p-16 text-hint">
+      — 没有更多了 —
+    </view>
+
+    <!-- 空状态 -->
+    <empty-state
+      wx:if="{{!loading && notifications.length === 0}}"
+      icon="📭"
+      text="暂无消息通知"
+      actionText=""
+    />
+  </scroll-view>
+</view>

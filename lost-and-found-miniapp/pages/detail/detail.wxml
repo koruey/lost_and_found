@@ -1,0 +1,227 @@
+<view wx:if="{{item}}" class="detail-page">
+  <!-- 图片轮播 -->
+  <swiper wx:if="{{images.length > 0}}" class="swiper" indicator-dots="{{images.length > 1}}" autoplay="{{false}}" circular>
+    <swiper-item wx:for="{{images}}" wx:key="*this">
+      <image
+        src="{{item}}"
+        mode="aspectFill"
+        class="swiper-image"
+        bindtap="onPreviewImage"
+        data-index="{{index}}"
+      />
+    </swiper-item>
+  </swiper>
+
+  <!-- 物品信息 -->
+  <view class="info-section card">
+    <!-- 类型标签 + 状态 -->
+    <view class="flex-between mb-16">
+      <view class="flex">
+        <text class="tag {{item.type === 0 ? 'tag-orange' : 'tag-green'}} mr-8">
+          {{item.type === 0 ? '失物' : '招领'}}
+        </text>
+        <text class="tag tag-blue">{{item.categoryName}}</text>
+      </view>
+      <text wx:if="{{item.status === 3}}" class="tag tag-gray">已解决</text>
+    </view>
+
+    <!-- 标题 -->
+    <view class="title text-xl text-bold">{{item.title}}</view>
+
+    <!-- 基本信息 -->
+    <view class="info-grid mt-24">
+      <view class="info-item">
+        <text class="info-label">📍 地点</text>
+        <text class="info-value">{{item.location || '未填写'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">📅 日期</text>
+        <text class="info-value">{{item.itemDate || ''}}</text>
+      </view>
+      <view class="info-item" wx:if="{{item.contact}}">
+        <text class="info-label">📞 联系方式</text>
+        <text class="info-value text-primary">{{item.contact}}</text>
+      </view>
+    </view>
+
+    <!-- 描述 -->
+    <view class="description-box mt-24">
+      <view class="desc-title text-bold mb-8">物品描述</view>
+      <text class="desc-content text-secondary">{{item.description}}</text>
+    </view>
+
+    <!-- AI增强描述 -->
+    <view wx:if="{{item.aiDescription}}" class="ai-box mt-24">
+      <view class="ai-title flex items-center">
+        <text class="ai-icon">🤖</text>
+        <text class="text-bold ml-8">AI增强描述</text>
+      </view>
+      <text class="ai-content text-secondary">{{item.aiDescription}}</text>
+    </view>
+
+    <!-- OCR识别文字 -->
+    <view wx:if="{{item.aiOcrText}}" class="ocr-box mt-16">
+      <view class="ocr-title flex items-center">
+        <text>🔍</text>
+        <text class="text-bold ml-8">OCR识别文字</text>
+      </view>
+      <text class="ocr-content text-secondary">{{item.aiOcrText}}</text>
+    </view>
+  </view>
+
+  <!-- 发布者信息 -->
+  <view class="user-section card flex-between">
+    <view class="flex items-center">
+      <image class="user-avatar" src="{{item.userAvatar || '/assets/default-avatar.png'}}" mode="aspectFill" />
+      <view class="ml-16">
+        <view class="text-bold">{{item.userNickname || '匿名用户'}}</view>
+        <view class="text-hint text-sm">发布于 {{item.createdAt || ''}}</view>
+      </view>
+    </view>
+    <view class="stats flex text-hint text-sm">
+      <text>👁 {{item.viewCount || 0}}</text>
+      <text class="ml-16">💬 {{item.commentCount || 0}}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-bar flex-between px-24 py-16 bg-white">
+    <button class="action-btn flex-col flex-center" bindtap="onToggleFavorite">
+      <text class="action-icon">{{isFavorited ? '❤️' : '🤍'}}</text>
+      <text class="text-sm mt-4">{{isFavorited ? '已收藏' : '收藏'}}</text>
+    </button>
+
+    <button wx:if="{{item.userId !== currentUserId && item.contact}}" class="action-btn flex-col flex-center" bindtap="onContact">
+      <text class="action-icon">💬</text>
+      <text class="text-sm mt-4">联系</text>
+    </button>
+
+    <button
+      wx:if="{{item.userId === currentUserId && item.status !== 3}}"
+      class="action-btn flex-col flex-center"
+      bindtap="onMarkResolved"
+    >
+      <text class="action-icon">✅</text>
+      <text class="text-sm mt-4">标记解决</text>
+    </button>
+
+    <button
+      wx:if="{{item.userId === currentUserId}}"
+      class="action-btn flex-col flex-center"
+      bindtap="onEdit"
+    >
+      <text class="action-icon">✏️</text>
+      <text class="text-sm mt-4">编辑</text>
+    </button>
+
+    <button
+      wx:if="{{item.userId === currentUserId}}"
+      class="action-btn flex-col flex-center"
+      bindtap="onDelete"
+    >
+      <text class="action-icon text-danger">🗑</text>
+      <text class="text-sm text-danger mt-4">删除</text>
+    </button>
+  </view>
+
+  <!-- ===== 评论区 ===== -->
+  <view class="comment-section mt-16">
+    <view class="comment-header flex-between px-24 py-16 bg-white">
+      <text class="text-bold">评论 ({{comments.length}})</text>
+    </view>
+
+    <!-- 评论列表 -->
+    <view wx:if="{{comments.length > 0}}" class="comment-list bg-white">
+      <block wx:for="{{comments}}" wx:key="id">
+        <!-- 顶级评论 -->
+        <view class="comment-item px-24 py-16">
+          <view class="flex">
+            <image class="comment-avatar" src="{{item.userAvatar || '/assets/default-avatar.png'}}" mode="aspectFill" />
+            <view class="ml-16 flex-1">
+              <view class="flex-between">
+                <text class="text-bold text-sm">{{item.userNickname || '匿名用户'}}</text>
+                <text class="text-hint text-sm">{{item.createdAt || ''}}</text>
+              </view>
+              <view class="comment-content mt-8 text-secondary">
+                {{item.content}}
+              </view>
+            </view>
+          </view>
+          <view class="comment-actions flex flex-between mt-8" style="padding-left:80rpx">
+            <text class="text-sm text-primary" data-id="{{item.id}}" data-nickname="{{item.userNickname}}" bindtap="onReplyComment">回复</text>
+            <text
+              wx:if="{{item.userId === currentUserId}}"
+              class="text-sm text-hint"
+              data-id="{{item.id}}"
+              bindtap="onDeleteComment"
+            >删除</text>
+          </view>
+          <!-- 子回复 -->
+          <view wx:if="{{item.replies && item.replies.length > 0}}" class="replies mt-8">
+            <view wx:for="{{item.replies}}" wx:key="id" wx:for-item="reply" class="reply-item flex mt-12" style="padding-left:80rpx">
+              <image class="comment-avatar" src="{{reply.userAvatar || '/assets/default-avatar.png'}}" mode="aspectFill" style="width:48rpx;height:48rpx" />
+              <view class="ml-12 flex-1">
+                <view class="flex-between">
+                  <view>
+                    <text class="text-bold text-sm">{{reply.userNickname || '匿名用户'}}</text>
+                    <text wx:if="{{reply.replyToNickname}}" class="text-hint text-sm"> 回复 </text>
+                    <text wx:if="{{reply.replyToNickname}}" class="text-primary text-sm">{{reply.replyToNickname}}</text>
+                  </view>
+                  <text class="text-hint text-sm">{{reply.createdAt || ''}}</text>
+                </view>
+                <view class="comment-content mt-4 text-secondary">
+                  {{reply.content}}
+                </view>
+                <view class="mt-4">
+                  <text class="text-sm text-primary" data-id="{{item.id}}" data-nickname="{{reply.userNickname}}" bindtap="onReplyComment">回复</text>
+                  <text
+                    wx:if="{{reply.userId === currentUserId}}"
+                    class="text-sm text-hint ml-16"
+                    data-id="{{reply.id}}"
+                    bindtap="onDeleteComment"
+                  >删除</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 空评论 -->
+    <empty-state
+      wx:if="{{comments.length === 0}}"
+      icon="💬"
+      text="暂无评论，来说点什么吧"
+      actionText=""
+    />
+
+    <!-- 发表评论 -->
+    <view class="comment-input-bar bg-white px-24 py-16">
+      <!-- 回复提示 -->
+      <view wx:if="{{replyTo}}" class="reply-hint flex-between mb-8">
+        <text class="text-sm text-primary">回复 @{{replyTo.nickname}}</text>
+        <text class="text-sm text-hint" bindtap="onCancelReply">✕ 取消</text>
+      </view>
+      <view class="flex items-center">
+        <input
+          class="comment-input flex-1"
+          placeholder="{{replyTo ? '回复 ' + replyTo.nickname + '...' : '输入评论内容...'}}"
+          value="{{commentText}}"
+          bindinput="onCommentInput"
+          maxlength="200"
+          confirm-type="send"
+          bindconfirm="onSendComment"
+          focus="{{!!replyTo}}"
+        />
+        <button
+          class="send-btn btn btn-primary btn-sm ml-16"
+          bindtap="onSendComment"
+          disabled="{{!canSend || sendingComment}}"
+        >
+          {{sendingComment ? '发送中' : '发送'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>
