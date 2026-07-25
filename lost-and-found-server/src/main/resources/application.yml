@@ -42,15 +42,15 @@ knife4j:
 # 微信小程序
 wx:
   app-id: wx94c3dde0e51b9a4e
-  app-secret: your-wx-app-secret
+  # app-secret 请在 application-secret.yml 中配置
 
 # 管理员配置
 admin:
-  password: your-admin-password
+  # password 请在 application-secret.yml 中配置
 
 # JWT
 jwt:
-  secret: your-jwt-secret
+  # secret 请在 application-secret.yml 中配置
   expiration: 7200000  # 2小时(毫秒)
 
 # 日志配置

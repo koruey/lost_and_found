@@ -1,0 +1,28 @@
+# ===== 敏感配置文件 =====
+application-secret.yml
+.trae/mcp.json
+
+# ===== 构建输出 =====
+lost-and-found-server/target/
+*.class
+*.jar
+*.war
+
+# ===== IDE =====
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# ===== 日志 =====
+*.log
+logs/
+
+# ===== 操作系统 =====
+.DS_Store
+Thumbs.db
+
+# ===== 依赖 =====
+node_modules/
